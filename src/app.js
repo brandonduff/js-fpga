@@ -1,13 +1,15 @@
 import Constants from './constants';
 import LogicSolutionTrainer from './logic-solution-trainer';
+import { initializeCircuitRender } from './rendering';
 
 let currentLeadingCircuit;
-let gateSprites = {};
+let gateSprites;
 let height = global.innerHeight;
 let pixi = global.PIXI;
 let Sprite = pixi.Sprite;
 let textures;
 let width = global.innerWidth;
+let screen = {height, width};
 
 let pixiApp = new pixi.Application({width: width, height: height});
 pixi.loader
@@ -15,43 +17,27 @@ pixi.loader
   .load(() => {
     textures = pixi.loader.resources['img/atlas.json'].textures;
 
-    for (let y = 0; y < height / 32; y++) {
-      for (let x = 0; x < width / 32; x++) {
-        let sprite = new Sprite(textures['and.png']);
-        sprite.x = x * 32;
-        sprite.y = y * 32;
+    gateSprites = [];
+    for (let i = 0; i < testTrainer.circuitSize; i++) {
+      let newSprite = new Sprite(textures['and.png']);
 
-        pixiApp.stage.addChild(sprite);
-        gateSprites[sprite.x + '-' + sprite.y] = sprite;
-      }
+      pixiApp.stage.addChild(newSprite);
+      gateSprites.push(newSprite);
     }
 
+    initializeCircuitRender(screen, gateSprites);
+
     pixiApp.ticker.add(() => {
-      let _index = 0;
-
-      if (currentLeadingCircuit) {
-        for (let y = 0; y < height / 32; y++) {
-          for (let x = 0; x < width / 32; x++) {
-            let _currentX = x * 32;
-            let _currentY = y * 32;
-
-            _index++;
-
-            if (_index < currentLeadingCircuit.gates.length) {
-              gateSprites[_currentX+ '-' + _currentY].visible = true;
-              gateSprites[_currentX+ '-' + _currentY].texture = textures[currentLeadingCircuit.gates[_index].type.toLowerCase() + '.png'];
-            } else {
-              gateSprites[_currentX+ '-' + _currentY].visible = false;
-            }
-          }
-        }
-      }
+      gateSprites.forEach((sprite, index) => {
+        sprite.texture = textures[`${currentLeadingCircuit.gates[index].type.toLowerCase()}.png`];
+      });
     });
   });
 
 var testTrainer = new LogicSolutionTrainer({
   onEvaluated: (circuits) => {
     currentLeadingCircuit = circuits[0];
+    console.log('run');
   },
   onFinished: (circuit) => {
     console.log(circuit);

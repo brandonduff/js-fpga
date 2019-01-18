@@ -8,5 +8,7 @@ export default {
     'NAND',
     'NOR',
     'XOR'
-  ]
+  ],
+  IMAGE_SIZE: 32,
+  IMAGE_PADDING: 10
 };
